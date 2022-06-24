@@ -1,94 +1,95 @@
-// Your code here
-/* Your Code Here */
 
-/*
- We're giving you this function. Take a look at it, you might see some usage
- that's new and different. That's because we're avoiding a well-known, but
- sneaky bug that we'll cover in the next few lessons!
- As a result, the lessons for this function will pass *and* it will be available
- for you to use if you need it!
- */
 
- let createEmployeeRecord = function(row){
+//Your code here
+function createEmployeeRecord(arr){
     return {
-        firstName: row[0],
-        familyName: row[1],
-        title: row[2],
-        payPerHour: row[3],
+        firstName: arr[0],
+        familyName: arr[1],
+        title: arr[2],
+        payPerHour: arr[3],
         timeInEvents: [],
         timeOutEvents: []
     }
 }
 
-let createEmployeeRecords = function(employeeRowData) {
-    return employeeRowData.map(function(row){
-        return createEmployeeRecord(row)
-    })
+let twoRows = [
+    ["moe", "sizlak", "barkeep", 2],
+    ["bartholomew", "simpson", "scamp", 3]
+  ]
+
+function createEmployeeRecords(arr){
+    //return [createEmployeeRecord(arr[0]), createEmployeeRecord(arr[1])]
+    let returnedArr = []
+    for (let i = 0; i<arr.length; i++){
+        returnedArr.push(createEmployeeRecord(arr[i]))
+    }
+    return returnedArr;
 }
 
-let createTimeInEvent = function(dateStamp){
-    let [date, hour] = dateStamp.split(' ')
 
-    this.timeInEvents.push({
+function createTimeInEvent(bpRecord, newEvent){
+    let updatedBpRecord = createEmployeeRecord(bpRecord)
+    updatedBpRecord.timeInEvents.push({
         type: "TimeIn",
-        hour: parseInt(hour, 10),
-        date,
+        hour: parseFloat(`${newEvent.slice(11)}`),
+        date: `${newEvent.slice(0, 10)}`
     })
-
-    return this
+    return updatedBpRecord;
 }
 
-let createTimeOutEvent = function(dateStamp){
-    let [date, hour] = dateStamp.split(' ')
-
-    this.timeOutEvents.push({
+function createTimeOutEvent(bpRecord, newEvent){
+    let updatedBpRecord = createEmployeeRecord(bpRecord)
+    updatedBpRecord.timeOutEvents.push({
         type: "TimeOut",
-        hour: parseInt(hour, 10),
-        date,
+        hour: parseFloat(`${newEvent.slice(11)}`),
+        date: `${newEvent.slice(0, 10)}`
     })
-
-    return this
+    return updatedBpRecord;
 }
 
-let hoursWorkedOnDate = function(soughtDate){
-    let comingIn = this.timeInEvents.find(function(e){
-        return e.date === soughtDate
-    })
-
-    let goingOut = this.timeOutEvents.find(function(e){
-        return e.date === soughtDate
-    })
-
-    return (goingOut.hour - comingIn.hour) / 100
+function hoursWorkedOnDate(record, date = '0044-03-15', hourIn = '0900', hourOut = '1100'){
+    let timeInRecord = createTimeInEvent(record, `${date} ${hourIn}`)
+    let timeOutRecord = createTimeOutEvent(record, `${date} ${hourOut}`)
+    let timeIn = parseFloat(timeInRecord.timeInEvents[0].hour)
+    let timeOut = parseFloat(timeOutRecord.timeOutEvents[0].hour)
+    return (timeOut - timeIn)/100
 }
 
-let wagesEarnedOnDate = function(dateSought){
-    let rawWage = hoursWorkedOnDate.call(this, dateSought)
-        * this.payPerHour
-    return parseFloat(rawWage.toString())
+//allWagesFor(["Julius", "Caesar", "General", 1000])
+
+function wagesEarnedOnDate(record, date){
+    let timeWorked = hoursWorkedOnDate(record, date)
+    return record.payPerHour * timeWorked;
 }
 
-let allWagesFor = function(){
-    let validDate = this.timeInEvents.map(function(e){
-        return e.date
-    })
 
-    let payable = validDate.reduce(function(memo, d){
-        return memo + wagesEarnedOnDate.call(this, d)
-    }.bind(this), 0)
+function allWagesFor(record){
+    let updateRecord = createEmployeeRecord(record)
+    let day1 = createTimeInEvent(updateRecord, "0044-03-14 0900")
+    let day2 = createTimeInEvent(updateRecord, "0044-03-15 0900")
+    let day1TimeOut = createTimeOutEvent(updateRecord, "0044-03-14 2100")
+    let day2TimeOut = createTimeOutEvent(updateRecord, "0044-03-15 1100")
+    day1.timeOutEvents = day1TimeOut.timeOutEvents
+    day2.timeOutEvents = day2TimeOut.timeOutEvents
 
-    return payable
+    let day1Time = hoursWorkedOnDate(day1, "0044-03-14")
+    let day2Time = hoursWorkedOnDate(day2, "0044-03-15", "0900", "2100")
+    return (updateRecord.payPerHour * day1Time) + (updateRecord.payPerHour * day1Time)
+    
 }
 
-let findEmployeeByFirstName = function(srcArray, firstName) {
-  return srcArray.find(function(rec){
-    return rec.firstName === firstName
-  })
+console.log(allWagesFor(["Julius", "Caesar", "General", 27]))
+
+function createEmployeeRecords(src){
+    let arr = []
+    for(let i = 0; i<src.length; i++){
+        arr.push(createEmployeeRecord(src[i]))
+    }
+    return arr;
 }
 
-let calculatePayroll = function(arrayOfEmployeeRecords){
-    return arrayOfEmployeeRecords.reduce(function(memo, rec){
-        return memo + allWagesFor.call(rec)
+function calculatePayroll(data){
+    return data.reduce(function(elem, data){
+        return elem + allWagesFor.call(data)
     }, 0)
 }
-
